@@ -3,7 +3,7 @@ import { Form, Input, Button, Modal, ModalContent, ModalHeader, ModalBody, Modal
 import axios from "axios";
 
 const API_URL = 'http://172.19.124.252/redmine/issues.json';
-const API_KEY = '02c64529ceafc7184deaabd1046128837967f1b6'; // Your API Key
+const API_KEY = '02c64529ceafc7184deaabd1046128837967f1b6';
 
 export default function App() {
   const [formData, setFormData] = React.useState(null);
@@ -32,9 +32,9 @@ export default function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget));
-    console.log("Form data:", data); // Log the created object
+    console.log("Form data:", data);
     setFormData(data);
-    await createIssue(data); // Call the createIssue function
+    await createIssue(data);
     onOpen();
   };
 
@@ -46,11 +46,16 @@ export default function App() {
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
+        textAlign: "center",
       }}
     >
+      <div style={{ marginBottom: "3rem" }}>
+        <h1><strong>Sistema de Gestión de Tickets - GTI</strong></h1>
+      </div>
       <Form
         className="w-full max-w-xs flex flex-col gap-4"
         validationBehavior="native"
@@ -59,30 +64,30 @@ export default function App() {
       >
         <Input
           isRequired
-          errorMessage="Please enter a valid Subject"
-          label="Subject"
+          errorMessage="Ingrese un Asunto Válido"
+          label="Asunto"
           labelPlacement="outside"
-          name="subject"
-          placeholder="Enter the Subject"
+          name="Asunto"
+          placeholder="Ingrese un Asunto"
           type="text"
         />
 
         <Input
           isRequired
-          errorMessage="Please enter a valid Description"
-          label="Description"
+          errorMessage="Ingrese una Descripción Válida"
+          label="Descripción"
           labelPlacement="outside"
-          name="description"
-          placeholder="Enter the Description"
+          name="Descripción"
+          placeholder="Ingrese una Descripción"
           type="text"
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2" style={{ marginTop: "1rem" }}>
           <Button color="primary" type="submit">
-            Submit
+            Registrar Ticket
           </Button>
           <Button type="reset" variant="flat">
-            Reset
+            Vaciar
           </Button>
         </div>
       </Form>
