@@ -1,44 +1,74 @@
-import React from "react";
-import { Form, Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import React, { useRef, useState } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/react";
 import axios from "axios";
+import { p } from "framer-motion/client";
 
-const API_URL = 'http://172.19.124.252/redmine/issues.json';
-const API_KEY = '02c64529ceafc7184deaabd1046128837967f1b6';
+const API_URL = "http://localhost:5176/redmine/issues.json"; // Proxy URL
+const API_KEY = "02c64529ceafc7184deaabd1046128837967f1b6";
 
 export default function App() {
-  const [formData, setFormData] = React.useState(null);
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const formRef = useRef(null);
 
   const createIssue = async (data) => {
+    const payload = {
+      subject: data.Asunto, // Map to Redmine's expected structure
+      description: data.Descripción,
+      project_id: 3, // Example project ID
+      tracker_id: 3, // Example tracker ID
+      status_id: 1, // Example status ID
+      priority_id: 2, // Example priority ID
+    };
+
     try {
       const response = await axios.post(
         API_URL,
-        { issue: data },
+        { issue: payload },
         {
           headers: {
-            'X-Redmine-API-Key': API_KEY,
-            'Content-Type': 'application/json',
+            "X-Redmine-API-Key": API_KEY,
+            "Content-Type": "application/json",
           },
         }
       );
       console.log("Issue created:", response.data);
       alert("Issue created successfully!");
     } catch (error) {
-      console.error("Error creating issue:", error.response ? error.response.data : error.message);
+      console.error("Error creating issue:", error.response?.data || error.message);
       alert("Failed to create issue. Please try again.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
-    console.log("Form data:", data);
+    if (!subject.trim() || !description.trim()) {
+      alert("Please fill out both fields.");
+      return;
+    }
+
+    const data = { Asunto: subject, Descripción: description };
     setFormData(data);
     await createIssue(data);
     onOpen();
   };
 
   const handleReset = () => {
+    formRef.current.reset();
+    setSubject("");
+    setDescription("");
     setFormData(null);
   };
 
@@ -54,15 +84,20 @@ export default function App() {
       }}
     >
       <div style={{ marginBottom: "3rem" }}>
-        <h1><strong>Sistema de Gestión de Tickets - GTI</strong></h1>
+        <h1>
+          <strong>Sistema de Gestión de Tickets - GTI</strong>
+        </h1>
       </div>
       <Form
+        ref={formRef}
         className="w-full max-w-xs flex flex-col gap-4"
         validationBehavior="native"
         onReset={handleReset}
         onSubmit={handleSubmit}
       >
         <Input
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
           isRequired
           errorMessage="Ingrese un Asunto Válido"
           label="Asunto"
@@ -73,6 +108,8 @@ export default function App() {
         />
 
         <Input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           isRequired
           errorMessage="Ingrese una Descripción Válida"
           label="Descripción"
@@ -109,7 +146,14 @@ export default function App() {
                   ))}
                 </ModalBody>
                 <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={() => {
+                      onOpenChange(false);
+                      onClose();
+                    }}
+                  >
                     Close
                   </Button>
                 </ModalFooter>
